@@ -184,7 +184,7 @@ app.listen(config.PORT, () => {
 });
 app.delete("/deletebook", async (req, res) => {
   const { id, bookName } = req.body;
-  if (!id && !bookName) {
+  if (!id || !bookName) {
     res.json({
       success: false,
       message: "Please field id or book name!",
