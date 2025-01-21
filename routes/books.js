@@ -112,3 +112,5 @@ router.delete("/deletebook", async (req, res) => {
     }
   }
 });
+
+module.exports = router;

@@ -3,7 +3,7 @@ const config = require("./config.js");
 
 const app = express();
 const routerUser = require("./routes/users.js");
-const routerBook = require("./routes/book.js");
+const routerBook = require("./routes/books.js");
 // json to object
 app.use(express.raw());
 app.use(express.json());
