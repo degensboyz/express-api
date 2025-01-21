@@ -1,22 +1,17 @@
 const jwt = require("jsonwebtoken");
-const privateKey = "mySecretKey";
-function encode(username, userId) {
-  const encoded = jwt.sign(
-    {
-      username,
-      userId,
-    },
-    privateKey,
-    {
-      expiresIn: "1d",
-    }
-  );
-  return encoded;
+const secretKey = "MYSECRETKEY";
+// Convert Data to token jwt
+
+function generateToken(data) {
+  return jwt.sign(data, secretKey, { expiresIn: "1d" });
 }
-function decode(token) {
-  return jwt.verify(token, privateKey);
+function verifyToken(token) {
+  try {
+    return jwt.verify(token, secretKey);
+  } catch (e) {
+    console.log({ message: e.message });
+    return false;
+  }
 }
-module.exports = {
-  encode,
-  decode,
-};
+
+module.exports = { generateToken, verifyToken };

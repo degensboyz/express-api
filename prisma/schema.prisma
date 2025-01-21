@@ -21,6 +21,7 @@ model Users {
   totalCredit Decimal  @default(0.00) @db.Decimal(10, 2)
   createAt    DateTime @default(now())
   updateAt    DateTime @updatedAt
+  Book        Book[]
 }
 
 model Book {
@@ -28,4 +29,6 @@ model Book {
   bookName String  @unique
   category String  @db.VarChar(30)
   price    Decimal @db.Decimal(5, 2)
+  usersId  Int
+  user     Users   @relation(fields: [usersId], references: [id])
 }
