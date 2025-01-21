@@ -6,7 +6,12 @@ function generateToken(data) {
   return jwt.sign(data, secretKey, { expiresIn: "1d" });
 }
 function verifyToken(token) {
-  return jwt.verify(token, secretKey);
+  try {
+    return jwt.verify(token, secretKey);
+  } catch (e) {
+    console.log({ message: e.message });
+    return false;
+  }
 }
 
 module.exports = { generateToken, verifyToken };
