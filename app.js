@@ -182,32 +182,3 @@ app.put("/updatebook", async (req, res) => {
 app.listen(config.PORT, () => {
   console.log(`Application started on http://localhost:${config.PORT}`);
 });
-app.delete("/deletebook", async (req, res) => {
-  const { id, bookName } = req.body;
-  if (!id || !bookName) {
-    res.json({
-      success: false,
-      message: "Please field id or book name!",
-    })
-    return;
-  }
-  try {
-    const deleteBook = await prisma.book.delete({
-      where: { id, bookName },
-    });
-    if (deleteBook) {
-      res.json({
-        success: true,
-        message: "Delete book successfully!"
-      });
-    }
-  } catch (error) {
-    if (error) {
-      res.status(404).json({
-        success: false,
-        message: "Id or Book name doesn't exist",
-        error: error.message,
-      });
-    }
-  }
-});
