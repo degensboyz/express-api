@@ -25,10 +25,11 @@ model Users {
 }
 
 model Book {
-  id       Int     @id @default(autoincrement())
-  bookName String  @unique
-  category String  @db.VarChar(30)
-  price    Decimal @db.Decimal(5, 2)
-  usersId  Int
-  user     Users   @relation(fields: [usersId], references: [id])
+  id        Int     @id @default(autoincrement())
+  bookName  String  @unique
+  bookImage String  @db.LongText
+  category  String  @db.VarChar(30)
+  price     Decimal @db.Decimal(5, 2)
+  usersId   Int
+  user      Users   @relation(fields: [usersId], references: [id])
 }
