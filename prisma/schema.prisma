@@ -14,22 +14,63 @@ datasource db {
 }
 
 model Users {
-  id          Int      @id @default(autoincrement())
-  username    String   @unique
-  password    String   @db.Text
-  credit      Decimal  @default(0.00) @db.Decimal(10, 2)
-  totalCredit Decimal  @default(0.00) @db.Decimal(10, 2)
-  createAt    DateTime @default(now())
-  updateAt    DateTime @updatedAt
-  Book        Book[]
+  id          Int        @id @default(autoincrement())
+  username    String     @unique
+  password    String     @db.Text
+  credit      Decimal    @default(0.00) @db.Decimal(10, 2)
+  totalCredit Decimal    @default(0.00) @db.Decimal(10, 2)
+  createAt    DateTime   @default(now())
+  updateAt    DateTime   @updatedAt
+  TopupLog    TopupLog[]
 }
 
-model Book {
+model TopupLog {
   id        Int     @id @default(autoincrement())
-  bookName  String  @unique
-  bookImage String  @db.LongText
-  category  String  @db.VarChar(30)
-  price     Decimal @db.Decimal(5, 2)
-  usersId   Int
-  user      Users   @relation(fields: [usersId], references: [id])
+  userId    Int
+  amount    Decimal @db.Decimal(10, 2)
+  reference String
+  image     String
+  user      Users   @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
+model Product {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  price       Decimal      @db.Decimal(10, 2)
+  image       String
+  categoryId  Int
+  category    Category     @relation(fields: [categoryId], references: [id])
+  subProducts SubProduct[]
+}
+
+model SubProduct {
+  id              Int               @id @default(autoincrement())
+  productId       Int
+  name            String
+  price           Decimal           @db.Decimal(10, 2)
+  product         Product           @relation(fields: [productId], references: [id])
+  SubProductStock SubProductStock[]
+}
+
+enum Status {
+  PENDING
+  SOLDOUT
+  REFUNDED
+}
+
+model SubProductStock {
+  id           Int        @id @default(autoincrement())
+  subProductId Int
+  data         String     @db.Text
+  status       Status     @default(PENDING)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  subProduct   SubProduct @relation(fields: [subProductId], references: [id])
 }
