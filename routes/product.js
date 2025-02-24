@@ -20,6 +20,20 @@ router.get("/product", async (req, res) => {
     });
 });
 
+router.get("/product/:id", async (req, res) => {
+    const id = req.params.id;
+    const product = await prisma.product.findFirst({
+        where: {
+            id: Number(id)
+        }
+    });
+    res.json({
+        success: true,
+        message: "Product",
+        data: product
+    });
+});
+
 router.get("/sub/:id", async (req, res) => {
     const product = await prisma.subProduct.findMany({
         where: {

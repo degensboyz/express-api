@@ -34,20 +34,32 @@ model TopupLog {
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  products Product[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
 }
 
 model Product {
   id          Int          @id @default(autoincrement())
   name        String
   description String
-  price       Decimal      @db.Decimal(10, 2)
   image       String
   categoryId  Int
+  isDeleted   Boolean      @default(false)
   category    Category     @relation(fields: [categoryId], references: [id])
   subProducts SubProduct[]
+  SubImage    SubImage[]
+}
+
+model SubImage {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  image     String
+  isDeleted Boolean @default(false)
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model SubProduct {
@@ -55,14 +67,9 @@ model SubProduct {
   productId       Int
   name            String
   price           Decimal           @db.Decimal(10, 2)
+  isDeleted       Boolean           @default(false)
   product         Product           @relation(fields: [productId], references: [id])
   SubProductStock SubProductStock[]
-}
-
-enum Status {
-  PENDING
-  SOLDOUT
-  REFUNDED
 }
 
 model SubProductStock {
@@ -72,5 +79,12 @@ model SubProductStock {
   status       Status     @default(PENDING)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+  isDeleted    Boolean    @default(false)
   subProduct   SubProduct @relation(fields: [subProductId], references: [id])
+}
+
+enum Status {
+  PENDING
+  SOLDOUT
+  REFUNDED
 }
