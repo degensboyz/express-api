@@ -9,7 +9,7 @@ const router = Router();
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
   if (!username) {
-    res.json({
+    res.status(400).json({
       success: false,
       message: "Username is required.",
     });
@@ -27,7 +27,7 @@ router.post("/login", async (req, res) => {
   });
   console.log(findUser);
   if (!findUser) {
-    res.json({
+    res.status(400).json({
       success: false,
       message: "Username is not exists.",
     });
@@ -43,6 +43,13 @@ router.post("/login", async (req, res) => {
   }
 
   const token = generateToken({ id: findUser.id, username });
+  res.cookie('accessToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+
+  })
   res.json({
     success: true,
     message: "Logged in successfully.",
@@ -104,11 +111,11 @@ router.post("/register", async (req, res) => {
 // What is middleware
 
 router.get("/me", Authenticated, (req, res) => {
-  console.log({
-    user: req.user,
-  });
   res.json({
     success: true,
+    data: {
+      user: req.user.username
+    }
   });
 });
 

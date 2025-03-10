@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const secretKey = "MYSECRETKEY";
+const secretKey = "fbebrl[bm-roefgmbore-gme[fgw,ea[]dfqw]aerd.]qwa";
 // Convert Data to token jwt
 
 function generateToken(data) {
