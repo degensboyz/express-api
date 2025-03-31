@@ -71,8 +71,65 @@ model users {
   topuplog    topuplog[]
 }
 
-enum subproductstock_status {
+model Product {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  image       String
+  categoryId  Int
+  isDeleted   Boolean      @default(false)
+  category    Category     @relation(fields: [categoryId], references: [id])
+  subProducts SubProduct[]
+  SubImage    SubImage[]
+}
+
+model SubImage {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  image     String
+  isDeleted Boolean @default(false)
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model SubProduct {
+  id              Int               @id @default(autoincrement())
+  productId       Int
+  name            String
+  price           Decimal           @db.Decimal(10, 2)
+  isDeleted       Boolean           @default(false)
+  product         Product           @relation(fields: [productId], references: [id])
+  SubProductStock SubProductStock[]
+}
+
+model SubProductStock {
+  id           Int        @id @default(autoincrement())
+  subProductId Int
+  data         String     @db.Text
+  status       Status     @default(PENDING)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  isDeleted    Boolean    @default(false)
+  subProduct   SubProduct @relation(fields: [subProductId], references: [id])
+}
+
+model AdminAccount {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String    @db.Text
+  fullName  String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  role      AdminRole @default(STAFF)
+}
+
+enum Status {
   PENDING
   SOLDOUT
   REFUNDED
+}
+
+enum AdminRole {
+  MASTER
+  STAFF
 }
