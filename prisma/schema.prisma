@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,77 +7,71 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  id          Int        @id @default(autoincrement())
-  username    String     @unique
-  password    String     @db.Text
-  credit      Decimal    @default(0.00) @db.Decimal(10, 2)
-  totalCredit Decimal    @default(0.00) @db.Decimal(10, 2)
-  createAt    DateTime   @default(now())
-  updateAt    DateTime   @updatedAt
-  TopupLog    TopupLog[]
+model category {
+  id      Int       @id @default(autoincrement())
+  name    String    @unique(map: "Category_name_key")
+  product product[]
 }
 
-model TopupLog {
+model product {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  price       Decimal      @db.Decimal(10, 2)
+  image       String
+  categoryId  Int
+  category    category     @relation(fields: [categoryId], references: [id], map: "Product_categoryId_fkey")
+  subproduct  subproduct[]
+
+  @@index([categoryId], map: "Product_categoryId_fkey")
+}
+
+model subproduct {
+  id              Int               @id @default(autoincrement())
+  productId       Int
+  name            String
+  price           Decimal           @db.Decimal(10, 2)
+  product         product           @relation(fields: [productId], references: [id], map: "SubProduct_productId_fkey")
+  subproductstock subproductstock[]
+
+  @@index([productId], map: "SubProduct_productId_fkey")
+}
+
+model subproductstock {
+  id           Int                    @id @default(autoincrement())
+  subProductId Int
+  data         String                 @db.Text
+  status       subproductstock_status @default(PENDING)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime
+  subproduct   subproduct             @relation(fields: [subProductId], references: [id], map: "SubProductStock_subProductId_fkey")
+
+  @@index([subProductId], map: "SubProductStock_subProductId_fkey")
+}
+
+model topuplog {
   id        Int     @id @default(autoincrement())
   userId    Int
   amount    Decimal @db.Decimal(10, 2)
   reference String
   image     String
-  user      Users   @relation(fields: [userId], references: [id])
+  users     users   @relation(fields: [userId], references: [id], map: "TopupLog_userId_fkey")
+
+  @@index([userId], map: "TopupLog_userId_fkey")
 }
 
-model Category {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  isDeleted Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  products  Product[]
+model users {
+  id          Int        @id @default(autoincrement())
+  username    String     @unique(map: "Users_username_key")
+  password    String     @db.Text
+  credit      Decimal    @default(0.00) @db.Decimal(10, 2)
+  totalCredit Decimal    @default(0.00) @db.Decimal(10, 2)
+  createAt    DateTime   @default(now())
+  updateAt    DateTime   @updatedAt()
+  topuplog    topuplog[]
 }
 
-model Product {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String
-  image       String
-  categoryId  Int
-  isDeleted   Boolean      @default(false)
-  category    Category     @relation(fields: [categoryId], references: [id])
-  subProducts SubProduct[]
-  SubImage    SubImage[]
-}
-
-model SubImage {
-  id        Int     @id @default(autoincrement())
-  productId Int
-  image     String
-  isDeleted Boolean @default(false)
-  product   Product @relation(fields: [productId], references: [id])
-}
-
-model SubProduct {
-  id              Int               @id @default(autoincrement())
-  productId       Int
-  name            String
-  price           Decimal           @db.Decimal(10, 2)
-  isDeleted       Boolean           @default(false)
-  product         Product           @relation(fields: [productId], references: [id])
-  SubProductStock SubProductStock[]
-}
-
-model SubProductStock {
-  id           Int        @id @default(autoincrement())
-  subProductId Int
-  data         String     @db.Text
-  status       Status     @default(PENDING)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  isDeleted    Boolean    @default(false)
-  subProduct   SubProduct @relation(fields: [subProductId], references: [id])
-}
-
-enum Status {
+enum subproductstock_status {
   PENDING
   SOLDOUT
   REFUNDED
