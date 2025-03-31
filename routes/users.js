@@ -25,7 +25,7 @@ router.post("/login", async (req, res) => {
   const findUser = await prisma.users.findFirst({
     where: { username },
   });
-  console.log(findUser);
+  // console.log(findUser);
   if (!findUser) {
     res.status(400).json({
       success: false,
@@ -42,7 +42,7 @@ router.post("/login", async (req, res) => {
     return;
   }
 
-  const token = generateToken({ id: findUser.id, username });
+  const token = generateToken({ id: findUser.id, username, role: 'USER' });
   res.cookie('accessToken', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

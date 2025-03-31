@@ -2,28 +2,28 @@ const express = require("express");
 const config = require("./config.js");
 const path = require("path");
 const app = express();
+const { routerUser, routerProduct, routerAdminAuth } = require("./routes");
 
 const cors = require("cors");
+const morgan = require("morgan");
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: "*",
   credentials: true,
 };
 
-app.use(cors(corsOptions));
 
-const routerUser = require("./routes/users.js");
-const routerProduct = require("./routes/product.js");
 
-// const routerBook = require("./routes/books.js");
-// json to object
 app.use(express.raw());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors(corsOptions));
+app.use(morgan("dev"));
 app.use("/uploads/", express.static(path.join(__dirname, "uploads")));
 
 app.use("/user", routerUser);
 app.use("/product", routerProduct);
+app.use("/admin-auth", routerAdminAuth);
 // app.use("/book", routerBook);
 
 app.listen(config.PORT, () => {

@@ -86,7 +86,7 @@ router.post("/addProduct", async (req, res) => {
     const { name, image, description, price, categoryId } = req.body;
     try {
         const product = await prisma.product.create({
-            data: { name, image, description, price, categoryId }
+            data: { name, image, description, categoryId }
         });
         res.json({
             success: true,
@@ -94,6 +94,7 @@ router.post("/addProduct", async (req, res) => {
             data: product
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({
             success: false,
             message: "Error adding product",

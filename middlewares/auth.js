@@ -7,8 +7,15 @@ function Authenticated(req, res, nextFunction) {
   const data = verifyToken(split[1]);
 
   if (data) {
-    req.user = data;
-    nextFunction();
+    if (data.role === "USER") {
+      req.user = data;
+      nextFunction();
+    } else {
+      res.status(401).json({
+        success: false,
+        message: "You are not authorized to access this resource.",
+      });
+    }
   } else {
     res.status(401).json({
       success: false,

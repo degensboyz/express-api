@@ -83,8 +83,24 @@ model SubProductStock {
   subProduct   SubProduct @relation(fields: [subProductId], references: [id])
 }
 
+model AdminAccount {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String    @db.Text
+  fullName  String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  role      AdminRole @default(STAFF)
+}
+
 enum Status {
   PENDING
   SOLDOUT
   REFUNDED
+}
+
+enum AdminRole {
+  MASTER
+  STAFF
 }
