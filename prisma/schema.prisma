@@ -53,11 +53,15 @@ model ProductStock {
 }
 
 model topuplog {
+model topuplog {
   id        Int     @id @default(autoincrement())
   userId    Int
   amount    Decimal @db.Decimal(10, 2)
   reference String
   image     String
+  users     users   @relation(fields: [userId], references: [id], map: "TopupLog_userId_fkey")
+
+  @@index([userId], map: "TopupLog_userId_fkey")
   users     users   @relation(fields: [userId], references: [id], map: "TopupLog_userId_fkey")
 
   @@index([userId], map: "TopupLog_userId_fkey")
