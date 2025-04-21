@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const { prisma } = require("./../utils/prisma.js");
+const { Authenticated } = require("../middlewares/auth.js");
 const router = Router();
 
 router.get("/category", async (req, res) => {
@@ -25,6 +26,9 @@ router.get("/product/:id", async (req, res) => {
     const product = await prisma.product.findFirst({
         where: {
             id: Number(id)
+        },
+        include: {
+            ProductStock: true
         }
     });
     res.json({
@@ -141,6 +145,85 @@ router.post("/addProductStock", async (req, res) => {
             error: error.message
         });
     }
+});
+
+router.post("/checkout", Authenticated, async (req, res) => {
+    const { productId } = req.body;
+    const product = await prisma.product.findFirst({
+        where: {
+            id: Number(productId)
+        }
+    });
+    if (!product) {
+        res.status(400).json({
+            success: false,
+            message: "Product not found"
+        });
+        return;
+    }
+    const user = await prisma.users.findFirst({
+        where: {
+            id: req.user.id
+        }
+    });
+    if (!user) {
+        res.status(400).json({
+            success: false,
+            message: "User not found"
+        });
+        return;
+    }
+    if (user.credit < product.price) {
+        res.status(400).json({
+            success: false,
+            message: "ยอดเงินของคุณไม่เพียงพอ กรุณาเติมเงินแล้วทำรายการใหม่อีกครั้ง"
+        });
+        return;
+    }
+    const stockEntry = await prisma.productStock.findFirst({
+        where: {
+            productId: product.id,
+        },
+    });
+
+    if (stockEntry) {
+        await prisma.productStock.update({
+            where: {
+                id: stockEntry.id,
+            },
+            data: {
+                stock: {
+                    decrement: 1,
+                },
+            },
+        });
+    }
+
+
+
+    const transaction = await prisma.transactionBuyProduct.create({
+        data: {
+            productId: product.id,
+            userId: user.id,
+            price: product.price,
+            quantity: 1
+        }
+    });
+    await prisma.users.update({
+        where: {
+            id: user.id
+        },
+        data: {
+            credit: {
+                decrement: product.price
+            }
+        }
+    });
+    res.json({
+        success: true,
+        message: "Checkout successfully",
+        data: product
+    });
 });
 module.exports = router;
 
