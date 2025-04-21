@@ -7,76 +7,90 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  id          Int        @id @default(autoincrement())
-  username    String     @unique
-  password    String     @db.Text
-  credit      Decimal    @default(0.00) @db.Decimal(10, 2)
-  totalCredit Decimal    @default(0.00) @db.Decimal(10, 2)
-  createAt    DateTime   @default(now())
-  updateAt    DateTime   @updatedAt
-  TopupLog    TopupLog[]
+model adminaccount {
+  id        Int               @id @default(autoincrement())
+  username  String            @unique(map: "AdminAccount_username_key")
+  password  String            @db.Text
+  fullName  String
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime
+  role      adminaccount_role @default(STAFF)
 }
 
-model TopupLog {
+model category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique(map: "Category_name_key")
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime
+  product   product[]
+}
+
+model product {
+  id                      Int                       @id @default(autoincrement())
+  name                    String
+  description             String
+  image                   String
+  price                   Decimal                   @db.Decimal(11, 2)
+  categoryId              Int
+  isDeleted               Boolean                   @default(false)
+  stock                   Int                       @default(0)
+  category                category                  @relation(fields: [categoryId], references: [id], map: "Product_categoryId_fkey")
+  product_stock           product_stock[]
+  transaction_buy_product transaction_buy_product[]
+
+  @@index([categoryId], map: "Product_categoryId_fkey")
+}
+
+model product_stock {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  stock     Int
+  product   product @relation(fields: [productId], references: [id], map: "ProductStock_productId_fkey")
+
+  @@index([productId], map: "ProductStock_productId_fkey")
+}
+
+model topuplog {
   id        Int     @id @default(autoincrement())
   userId    Int
   amount    Decimal @db.Decimal(10, 2)
   reference String
   image     String
-  user      Users   @relation(fields: [userId], references: [id])
+  users     users   @relation(fields: [userId], references: [id], map: "TopupLog_userId_fkey")
+
+  @@index([userId], map: "TopupLog_userId_fkey")
 }
 
-model Category {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  isDeleted Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  products  Product[]
-}
-
-model Product {
-  id           Int            @id @default(autoincrement())
-  name         String
-  description  String
-  image        String
-  price        Decimal        @db.Decimal(11, 2)
-  categoryId   Int
-  isDeleted    Boolean        @default(false)
-  category     Category       @relation(fields: [categoryId], references: [id])
-  ProductStock ProductStock[]
-}
-
-model ProductStock {
+model transaction_buy_product {
   id        Int      @id @default(autoincrement())
+  userId    Int
   productId Int
-  data      String   @db.Text
-  status    Status   @default(PENDING)
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isDeleted Boolean  @default(false)
-  product   Product  @relation(fields: [productId], references: [id])
+  updatedAt DateTime
+  product   product  @relation(fields: [productId], references: [id], map: "TransactionBuyProduct_productId_fkey")
+  users     users    @relation(fields: [userId], references: [id], map: "TransactionBuyProduct_userId_fkey")
+
+  @@index([productId], map: "TransactionBuyProduct_productId_fkey")
+  @@index([userId], map: "TransactionBuyProduct_userId_fkey")
 }
 
-model AdminAccount {
-  id        Int       @id @default(autoincrement())
-  username  String    @unique
-  password  String    @db.Text
-  fullName  String
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  role      AdminRole @default(STAFF)
+model users {
+  id                      Int                       @id @default(autoincrement())
+  username                String                    @unique(map: "Users_username_key")
+  password                String                    @db.Text
+  credit                  Decimal                   @default(0.00) @db.Decimal(10, 2)
+  totalCredit             Decimal                   @default(0.00) @db.Decimal(10, 2)
+  createAt                DateTime                  @default(now())
+  updateAt                DateTime
+  topuplog                topuplog[]
+  transaction_buy_product transaction_buy_product[]
 }
 
-enum Status {
-  PENDING
-  SOLDOUT
-  REFUNDED
-}
-
-enum AdminRole {
+enum adminaccount_role {
   MASTER
   STAFF
 }
