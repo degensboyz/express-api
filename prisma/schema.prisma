@@ -37,19 +37,20 @@ model product {
   isDeleted               Boolean                   @default(false)
   stock                   Int                       @default(0)
   category                category                  @relation(fields: [categoryId], references: [id], map: "Product_categoryId_fkey")
-  product_stock           product_stock[]
+  product_stock           ProductStock[]
   transaction_buy_product transaction_buy_product[]
 
   @@index([categoryId], map: "Product_categoryId_fkey")
 }
 
-model product_stock {
+model ProductStock {
   id        Int     @id @default(autoincrement())
   productId Int
   stock     Int
   product   product @relation(fields: [productId], references: [id], map: "ProductStock_productId_fkey")
 
   @@index([productId], map: "ProductStock_productId_fkey")
+  @@map("product_stock")
 }
 
 model topuplog {

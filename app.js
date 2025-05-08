@@ -2,7 +2,7 @@ const express = require("express");
 const config = require("./config.js");
 const path = require("path");
 const app = express();
-const { routerUser, routerProduct, routerAdminAuth } = require("./routes");
+const { routerUser, routerProduct, routerAdminAuth, routerTransactions } = require("./routes");
 
 const cors = require("cors");
 const morgan = require("morgan");
@@ -24,6 +24,7 @@ app.use("/uploads/", express.static(path.join(__dirname, "uploads")));
 app.use("/user", routerUser);
 app.use("/product", routerProduct);
 app.use("/admin-auth", routerAdminAuth);
+app.use("/transactions", routerTransactions);
 // app.use("/book", routerBook);
 
 app.listen(config.PORT, () => {

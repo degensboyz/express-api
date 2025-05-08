@@ -26,15 +26,27 @@ router.get("/product/:id", async (req, res) => {
     const product = await prisma.product.findFirst({
         where: {
             id: Number(id)
-        },
-        include: {
-            ProductStock: true
+        }
+    });
+    if (!product) {
+        res.status(400).json({
+            success: false,
+            message: "Product not found"
+        });
+        return;
+    }
+    const countStock = await prisma.productStock.findFirst({
+        where: {
+            productId: product.id,
         }
     });
     res.json({
         success: true,
         message: "Product",
-        data: product
+        data: {
+            product,
+            countStock: countStock?.stock || 0
+        }
     });
 });
 
@@ -201,12 +213,14 @@ router.post("/checkout", Authenticated, async (req, res) => {
 
 
 
-    const transaction = await prisma.transactionBuyProduct.create({
+    const transaction = await prisma.transaction_buy_product.create({
         data: {
             productId: product.id,
             userId: user.id,
             price: product.price,
-            quantity: 1
+            quantity: 1,
+            createdAt: new Date(),
+            updatedAt: new Date()
         }
     });
     await prisma.users.update({

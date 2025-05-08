@@ -1,5 +1,6 @@
 module.exports = {
     routerUser: require("./users"),
     routerProduct: require("./product"),
-    routerAdminAuth: require("./admin-auth")
+    routerAdminAuth: require("./admin-auth"),
+    routerTransactions: require("./transactions")
 }

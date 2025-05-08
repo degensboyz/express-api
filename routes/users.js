@@ -91,8 +91,7 @@ router.post("/register", async (req, res) => {
     return;
   }
   //create user data
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+  const hashedPassword = await bcrypt.hash(password, 10);
   const createUser = await prisma.users.create({
     data: {
       username,
@@ -117,6 +116,42 @@ router.get("/me", Authenticated, (req, res) => {
       user: req.user.username
     }
   });
+});
+
+router.post('/change-password', Authenticated, async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const user = req.user;
+  const findUser = await prisma.users.findUnique({
+    where: { id: user.id }
+  });
+  if (!findUser) {
+    res.json({
+      success: false,
+      message: "ไม่พบบัญชีผู้ใช้งาน"
+    });
+    return;
+  }
+  const checkPassword = await bcrypt.compare(oldPassword, findUser.password);
+  if (!checkPassword) {
+    res.json({
+      success: false,
+      message: "รหัสผ่านเดิมไม่ถูกต้อง"
+    });
+    return;
+  }
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  const updateUser = await prisma.users.update({
+    where: { id: user.id },
+    data: { password: hashedPassword }
+  });
+  if (updateUser) {
+    res.json({
+      success: true,
+      message: "รหัสผ่านถูกเปลี่ยนเรียบร้อย"
+    });
+    return;
+  }
+  
 });
 
 module.exports = router;
