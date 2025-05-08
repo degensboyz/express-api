@@ -99,10 +99,10 @@ router.post("/addCategory", async (req, res) => {
 });
 
 router.post("/addProduct", async (req, res) => {
-    const { name, image, description, price, categoryId } = req.body;
+    const { name, image, price, description, categoryId } = req.body;
     try {
         const product = await prisma.product.create({
-            data: { name, image, description, categoryId }
+            data: { name, price, image, description, categoryId }
         });
         res.json({
             success: true,
