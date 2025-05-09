@@ -83,10 +83,15 @@ model users {
   id                      Int                       @id @default(autoincrement())
   username                String                    @unique(map: "Users_username_key")
   password                String                    @db.Text
+  email                   String                    @db.Text
+  phone                   String                    @db.VarChar(10)
+  firstname               String?                   @db.Text
+  lastname                String?                   @db.Text
+  address                 String?                   @db.Text
   credit                  Decimal                   @default(0.00) @db.Decimal(10, 2)
   totalCredit             Decimal                   @default(0.00) @db.Decimal(10, 2)
   createAt                DateTime                  @default(now())
-  updateAt                DateTime
+  updateAt                DateTime                  @default(now())
   topuplog                topuplog[]
   transaction_buy_product transaction_buy_product[]
 }

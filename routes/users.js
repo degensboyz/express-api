@@ -63,7 +63,7 @@ router.post("/login", async (req, res) => {
 });
 // ---------register---------------------------------------------------------------------
 router.post("/register", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email, phone } = req.body;
   if (!username) {
     res.json({
       success: false,
@@ -78,17 +78,54 @@ router.post("/register", async (req, res) => {
     });
     return;
   }
-  //check username is already use or not
-  const findUser = await prisma.users.findFirst({
-    where: { username },
-  });
-  console.log(findUser);
-  if (findUser) {
+  if (!email) {
     res.json({
       success: false,
-      message: "Username is already exists.",
+      message: "email is required"
     });
     return;
+  }
+  if (!phone) {
+    res.json({
+      success: false,
+      message: "phone is required"
+    });
+    return;
+  }
+
+  //check username,email,phone is already use or not
+  const findUser = await prisma.users.findFirst({
+    where: { 
+      OR: [
+        { username },
+        { email },
+        { phone }
+      ]
+    }
+  });
+
+  if (findUser) {
+    if (findUser.username === username) {
+      res.json({
+        success: false,
+        message: "Username is already exists.",
+      });
+      return;
+    }
+    if (findUser.email === email) {
+      res.json({
+        success: false,
+        message: "Email is already exists.",
+      });
+      return;
+    }
+    if (findUser.phone === phone) {
+      res.json({
+        success: false,
+        message: "Phone is already exists.",
+      });
+      return;
+    }
   }
   //create user data
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -96,6 +133,8 @@ router.post("/register", async (req, res) => {
     data: {
       username,
       password: hashedPassword,
+      email,
+      phone,
     },
   });
   if (createUser) {
